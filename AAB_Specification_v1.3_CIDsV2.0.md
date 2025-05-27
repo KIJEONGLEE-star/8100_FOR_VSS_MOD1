@@ -881,85 +881,127 @@ When an error is detected, it shall be communicated to the Main node and it’s 
 
 # 8 CID description  
 
-This section contains the description of all the command IDs supported.  
+This section contains the description of all the command IDs supported.
+The column Sender (command) / Receiver (execute) indicates the capability of the Device Type in column C to command or execute the CID.
+The BCST indicates a message shall be sent to each node in the network.
+A Response Command (01h) shall be sent after execution of CID; it does not matter which frame type has been received.
+In case of Request Info (02h) reception, the node shall response with the corresponding CID Layout requested.
+The message catalog file has the complete list of messages that are expected to be transmitted over the network.
 
-Command type could be **Read** when data information is requested and **Write** when an action is requested. **BCST**, when it is a Broadcast, or **P2P**, when the message is addressed to a specific node, for simplicity if a CID is P2P label is omitted.
+## 📡 Network Generic CIDs
+| CID       | Command Name             | Device Type | Sender / Receiver              | Layout          | Update Rate                        | Comments |
+|-----------|--------------------------|--------------|-------------------------------|------------------|------------------------------------|----------|
+| `00h`     | Network startup/validation | DSP          | BCST                          | UID [8]          | At startup                         | This CID verifies the configured network. Should be sent as a broadcast message at startup by the Main node. Every sub-node should respond with its UID. <br><br>**UID:**<br>0: Unknown<br>XX: See Unit Identifiers mapping Table |
+|           |                          | ALL          | R                             | UID [8]          | At startup                         | This CID verifies the configured network. Should be sent as a broadcast message at startup by the Main node. Every sub-node should respond with its UID. <br><br>**UID:**<br>0: Unknown<br>XX: See Unit Identifiers mapping Table |
+| `01h`     teams| Response Command         | DSP          | R                             | CID_ECHO [8]     | Value change                       | This CID is the response of any command, all the sub-nodes should respond with an echo of the CID commanded and, in case of a request, the data requested. This CID may fit in a single or more Mailbox messages, depending on data size. <br><br>**Status:**<br>0: Completion response<br>1: CID Not Supported<br>2: Parameter error (out of range)<br>3: Busy (Command in execution)<br>4: Execution failure<br>5-225: Reserved |
+|           |                          | AMP          | R                             | CID_ECHO [8]     | Value change                       | This CID is the response of any command, all the sub-nodes should respond with an echo of the CID commanded and, in case of a request, the data requested. This CID may fit in a single or more Mailbox messages, depending on data size. <br><br>**Status:**<br>0: Completion response<br>1: CID Not Supported<br>2: Parameter error (out of range)<br>3: Busy (Command in execution)<br>4: Execution failure<br>5-225: Reserved |
+| `02h`     | Request Info             | ALL          | S                             | CID [8]          | On Event                           | See CID layout for complete |
+| `03h`     | Communication error      | DSP          | R                             | Error type [8]   | Value change                       | **Error type:**<br>0: None<br>1: Error at Sender<br>2: Error at Receiver |
+|           |                          | AMP          | R                             |  Error type [8]   | Value change                       | **Error type:**<br>0: None<br>1: Error at Sender<br>2: Error at Receiver |
+| `04h–0Fh` | Reserved                 | N/A          | N/A                           |                  |                                    | Reserved by Harman for future protocols support |
 
-A Response Command shall be sent after a CID is received; it does not matter which frame type has been received.
+## 🎧 Audio Control CIDs
+| CID   | Command Name                     | Device Type | Sender / Receiver | Layout                              | Update Rate   | Comments |
+|--------|----------------------------------|--------------|--------------------|--------------------------------------|----------------|----------|
+| `10h` | Audio/Video Source Name          | DSP          | R                  | DATA                                 | Value change   | Sent on event by the Audio Host whenever the Audio Source changes. <br><br>**DATA:**<br>Data Length: TBD |
+| `11h` | Audio Source Type and Capabilities | DSP        | R                  | TYPE [8]<br>CAPABILITIES [32]        | Value change   | Sent on event by the Audio Host, whenever the Audio Source changes.<br>As for TYPE:<br>1 = AM<br>2 = FM<br>3 = Weather<br>4 = DAB<br>5 = Aux<br>6 = USB<br>7 = CD<br>8 = MP3<br>9 = Apple iOS<br>10 = Android<br>11 = Bluetooth<br>12 = Sirius XM<br>13 = Pandora<br>14 = Spotify<br>15 = Slacker<br>16 = Songza<br>17 = Apple Radio<br>18 = Last FM<br>19 = Ethernet<br>20 = Video MP4<br>21 = Video DVD<br>22 = Video BlueRay<br>23 = HDMI<br>24 = Video<br>25 = MPW<br>26 = WiFi<br>27 = Roon<br>28 = Microphone A2B<br>29 - 252 = User Defined<br>253 = Reserved<br>254 = Error<br>255 = Not available<br>As for CAPABILITIES:<br>xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxx1 = Play<br>xxxx xxxx xxxx xxxx xxxx xxxx xxxx xx1x = Pause<br>xxxx xxxx xxxx xxxx xxxx xxxx xxxx x1xx = Stop<br>xxxx xxxx xxxx xxxx xxxx xxxx xxxx 1xxx = FF (1x)<br>xxxx xxxx xxxx xxxx xxxx xxxx xxx1 xxxx = FF (2x)<br>xxxx xxxx xxxx xxxx xxxx xxxx xx1x xxxx = FF (3x)<br>xxxx xxxx xxxx xxxx xxxx xxxx x1xx xxxx = FF (4x)<br>xxxx xxxx xxxx xxxx xxxx xxxx 1xxx xxxx = RW (1x)<br>xxxx xxxx xxxx xxxx xxxx xxx1 xxxx xxxx = RW (2x)<br>xxxx xxxx xxxx xxxx xxxx xx1x xxxx xxxx = RW (3x)<br>xxxx xxxx xxxx xxxx xxxx x1xx xxxx xxxx = RW (4x)<br>xxxx xxxx xxxx xxxx xxxx 1xxx xxxx xxxx = Skip Ahead<br>xxxx xxxx xxxx xxxx xxx1 xxxx xxxx xxxx = Skip Back<br>xxxx xxxx xxxx xxxx xx1x xxxx xxxx xxxx = Jog Ahead<br>xxxx xxxx xxxx xxxx x1xx xxxx xxxx xxxx = Jog back<br>xxxx xxxx xxxx xxxx 1xxx xxxx xxxx xxxx = Seek Up<br>xxxx xxxx xxxx xxx1 xxxx xxxx xxxx xxxx = Seek Down<br>xxxx xxxx xxxx xx1x xxxx xxxx xxxx xxxx = Scan Up<br>xxxx xxxx xxxx x1xx xxxx xxxx xxxx xxxx = Scan Down<br>xxxx xxxx xxxx 1xxx xxxx xxxx xxxx xxxx = Tune Up<br>xxxx xxxx xxx1 xxxx xxxx xxxx xxxx xxxx = Tune Down<br>xxxx xxxx xx1x xxxx xxxx xxxx xxxx xxxx = Slow Mo(.75x)<br>xxxx xxxx x1xx xxxx xxxx xxxx xxxx xxxx = Slow Mo(.5x)<br>xxxx xxxx 1xxx xxxx xxxx xxxx xxxx xxxx = Slow Mo(.25x)<br>xxxx xxx1 xxxx xxxx xxxx xxxx xxxx xxxx = Slow Mo(.125x)<br>xxxx xx1x xxxx xxxx xxxx xxxx xxxx xxxx = Source Renaming<br>xxxx x1xx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved<br>xxxx 1xxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved<br>xxx1 xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved<br>xx1x xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved<br>x1xx xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved<br>1xxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved |
+| `12h` | Play Status                      | DSP          | S / R              | ZONE [8]<br>COMMAND [8]              | Value change   | This CID is sent only by a sub node with HMI to the primary node every time there is a change in status.<br>For other devices only Play/Pause apply for mute/unmute.<br>COMMAND:<br>0 = Play (Normal functionality)<br>1 = Pause<br>2 = Stop<br>3 = FF (1x)<br>4 = FF (2x)<br>5 = FF (3x)<br>6 = FF (4x)<br>7 = RW (1x)<br>8 = RW (2x)<br>9 = RW (3x)<br>10 = RW (4x)<br>11 = Skip Ahead<br>12 = Skip Back<br>13 = Jog Ahead<br>14 = Jog Back<br>15 = Seek Up<br>16 = Seek Down<br>17 = Scan Up<br>18 = Scan Down<br>19 = Tune Up<br>20 = Tune Down<br>21 = Slow Motion (.75x)<br>22 = Slow Motion (.5x)<br>23 = Slow Motion (.25x)<br>24 = Slow Motion (.125x)<br>25 - 252 = User Defined<br>253 = Reserved<br>254 = Error<br>255 = Not available |
+| `13h` | Zone Volume Absolute             | DSP          | S / R              | ZONE [8]<br>DATA [8]                 | Value change   | As for ZONE:<br>0 = All Zones<br>1 = Zone 1<br>2 = Zone 2<br>3 = Zone 3<br>4 = Zone 4<br>5 – 255 = Reserved<br>As for DATA:<br>Range: 0 to 252%<br>(Valid range 0-100%. Any value greater >100% shall be interpreted as 100%) |
+| `14h` | Zone Volume Step                 | DSP          | S / R              | ZONE [8], STEP_DIR [1], STEP_SIZE [4], RESERVED [3] | Value change   |As for ZONE:<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>As for STEP_DIR:<br>0 = Volume Up<br>1 = Volume Down<br>As for STEP_SIZE:<br>Range: 0 to 15 |
+| `15h` | Mute Zone                        | DSP          | S / R              | ZONE [8]                             | Value change   | This CID contains the mute status for the zones in the vehicle.<br>As for ZONE:<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>Where:<br>0 = Disable<br>1 = Enable |
+| `16h` | Mute Channels                    | DSP          | S / R              | MUTE_BIT_MAP [16]                    | Value change   | Bit map representing a mute status of the 16 channels.<br>Mute: Logic high (1)<br>Unmute: Logic low (0) |
+|           |                          | AMP          | R                             | MUTE_BIT_MAP [16]                    | Value change   | Bit map representing a mute status of the 16 channels.<br>Mute: Logic high (1)<br>Unmute: Logic low (0) |
+| `17h` | Elapsed Track/Chapter Time       | HU           | S / R              | DATA                                 | Value change   | As for DATA:<br>Time, 1 Second Resolution<br>Range: 0 to 65532 seconds<br> |
+| `18h` | Track/Chapter Time               | HU           | S / R              | DATA                                 | Value change   | As for DATA:<br>Time, 1 Second Resolution<br>Range: 0 to 65532 seconds<br> |
+| `19h` | Repeat Support                   | HU           | S / R              | SUPPORTED [4]<br>STATUS [4]          | Value change   | As for SUPPORTED:<br>xxx1 = Song<br>xx1x = Play Queue<br>x1xx = Reserved<br>1xxx = Reserved<br>As for STATUS:<br>0 = Off<br>1 = One (Current File)<br>2 = All (Play Queue)<br>3 - 14 = Reserved<br>15 = Data Not Available / Do Not Change |
+| `1Ah` | Shuffle Support                  | HU           | S / R              | SUPPORTED [4]<br>STATUS [4]          | Value change   | As for SUPPORTED:<br>xxx1 = Play Queue<br>xx1x = All<br>x1xx = Reserved<br>1xxx = Reserved<br>As for DATA:<br>0 = Off<br>1 = Play Queue<br>2 = All<br>3 - 14 = Reserved<br>15 = Data Not Available / Do Not Change |
+| `1Bh–1Fh` | Reserved                     | N/A          | N/A                | -                                    | -              | Reserved by Harman for future protocols support |
 
-| CID | Command name | Type | Layout | Comments |
-|---|---|---|---|---|
-| 00h | Network startup/validation | BCST | | This CID verifies the configured network. Should be sent as a broadcast message at startup by the main node. Every sub-node should respond with its UID. |
-| 01h | Response Command | R | CID_ECHO [8] STATUS [8] DATA [8] | This CID is the response to any command, all the sub-nodes should respond with an echo of the CID commanded and in case of a request, the data requested. This CID may fit in a single or more Mailbox messages, depending on whether data is requested. As for the STATUS: 0: Completion response 1: CID Not Supported 2: Parameter error (out of range) 3: Busy (Command in execution) 4: Execution failure 5-225: Reserved |
-| 02h | Communication error | R | Error type [8] | Where Error type could be: 0: None 1: Error at Sender 2: Error at Receiver |
-| 03h – 0Fh | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 10h | Audio/Video Source Name | | DATA | Sent on event by the Audio Host, whenever the Audio Source changes. As for DATA: Data Length: TBD |
-| 11h | Audio Source Type and Capabilities | | TYPE [8] CAPABILITIES [32] | Sent on event by the Audio Host, whenever the Audio Source changes. As for TYPE: 1 = AM 2 = FM 3 = Weather 4 = DAB 5 = Aux 6 = USB 7 = CD 8 = MP3 9 = Apple iOS 10 = Android 11 = Bluetooth 12 = Sirius XM 13 = Pandora 14 = Spotify 15 = Slacker 16 = Songza 17 = Apple Radio 18 = Last FM 19 = Ethernet 20 = Video MP4 21 = Video DVD 22 = Video BlueRay 23 = HDMI 24 = Video 25 = MPW 26 = WiFi 27 = Roon 28 = Microphone A2B 29 - 252 = User Defined 253 = Reserved 254 = Error 255 = Not available As for CAPABILITIES: xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxx1 = Play xxxx xxxx xxxx xxxx xxxx xxxx xxxx xx1x = Pause xxxx xxxx xxxx xxxx xxxx xxxx xxxx x1xx = Stop xxxx xxxx xxxx xxxx xxxx xxxx xxxx 1xxx = FF (1x) xxxx xxxx xxxx xxxx xxxx xxxx xxx1 xxxx = FF (2x) xxxx xxxx xxxx xxxx xxxx xxxx xx1x xxxx = FF (3x) xxxx xxxx xxxx xxxx xxxx xxxx x1xx xxxx = FF (4x) xxxx xxxx xxxx xxxx xxxx xxxx 1xxx xxxx = RW (1x) xxxx xxxx xxxx xxxx xxxx xxx1 xxxx xxxx = RW (2x) xxxx xxxx xxxx xxxx xxxx xx1x xxxx xxxx = RW (3x) xxxx xxxx xxxx xxxx xxxx x1xx xxxx xxxx = RW (4x) xxxx xxxx xxxx xxxx xxxx 1xxx xxxx xxxx = Skip Ahead xxxx xxxx xxxx xxxx xxx1 xxxx xxxx xxxx = Skip Back xxxx xxxx xxxx xxxx xx1x xxxx xxxx xxxx = Jog Ahead xxxx xxxx xxxx xxxx x1xx xxxx xxxx xxxx = Jog back xxxx xxxx xxxx xxxx 1xxx xxxx xxxx xxxx = Seek Up xxxx xxxx xxxx xxx1 xxxx xxxx xxxx xxxx = Seek Down xxxx xxxx xxxx xx1x xxxx xxxx xxxx xxxx = Scan Up xxxx xxxx xxxx x1xx xxxx xxxx xxxx xxxx = Scan Down xxxx xxxx xxxx 1xxx xxxx xxxx xxxx xxxx = Tune Up xxxx xxxx xxx1 xxxx xxxx xxxx xxxx xxxx = Tune Down xxxx xxxx xx1x xxxx xxxx xxxx xxxx xxxx = Slow Mo(.75x) xxxx xxxx x1xx xxxx xxxx xxxx xxxx xxxx = Slow Mo(.5x) xxxx xxxx 1xxx xxxx xxxx xxxx xxxx xxxx = Slow Mo(.25x) xxxx xxx1 xxxx xxxx xxxx xxxx xxxx xxxx = Slow Mo(.125x) xxxx xx1x xxxx xxxx xxxx xxxx xxxx xxxx = Source Renaming xxxx x1xx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved xxxx 1xxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved xxx1 xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved xx1x xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved x1xx xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved 1xxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx = Reserved |
-| 12h | Play Status | R/S | COMMAND [8] | This CID is sent only by a sub node with HMI to the primary node every time there is a change in status. For other devices only Play/Pause apply for mute/unmute. COMMAND: 0 = Play (Normal functionality) 1 = Pause 2 = Stop 3 = FF (1x) 4 = FF (2x) 5 = FF (3x) 6 = FF (4x) 7 = RW (1x) 8 = RW (2x) 9 = RW (3x) 10 = RW (4x) 11 = Skip Ahead 12 = Skip Back 13 = Jog Ahead 14 = Jog Back 15 = Seek Up 16 = Seek Down 17 = Scan Up 18 = Scan Down 19 = Tune Up 20 = Tune Down 21 = Slow Motion (.75x) 22 = Slow Motion (.5x) 23 = Slow Motion (.25x) 24 = Slow Motion (.125x) 25 - 252 = User Defined 253 = Reserved 254 = Error 255 = Not available |
-| 13h | Zone Volume Absolute | R/S | ZONE[8] DATA[8] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for DATA: Range: 0 to 252% (Valid range 0-100%. Any value greater >100% shall be interpreted as 100%) |
-| 14h | Zone Volume Step | | ZONE [8] STEP_DIR [1] STEP_SIZE [4] RESERVED [3] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for STEP_DIR: 0 = Volume Up 1 = Volume Down As for STEP_SIZE: Range: 0 to 15 |
-| 15h | Mute zone | R/S | ZONE [8] COMMAND [8] | This CID contains the mute status for the zones in the vehicle. As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for COMMAND: "0 = [No, Off, Disabled, Reset, “0”]" "1 = [Yes, On, Enable, Set, “1”]" 3 = Error 4 ? 255 = Reserved |
-| 16h | Mute Channels | R/S | MUTE_BIT_MAP [16] | Bit map representing a mute status of the 16 channels. Mute: Logic high (1) Unmute: Logic low (0) |
-| 17h | Elapsed Track/Chapter Time | | DATA | As for DATA: "Time, 1 Second Resolution" Range: 0 to 65532 seconds |
-| 18h | Track/Chapter Time | | DATA | As for DATA: "Time, 1 Second Resolution" Range: 0 to 65532 seconds |
-| 19h | Repeat Support | | SUPPORTED [4] STATUS [4] | As for SUPPORTED: xxx1 = Song xx1x = Play Queue x1xx = Reserved 1xxx = Reserved As for STATUS: 0 = Off 1 = One (Current File) 2 = All (Play Queue) 3 - 14 = Reserved 15 = Data Not Available / Do Not Change |
-| 1Ah | Shuffle Support | | SUPPORTED [4] STATUS [4] | As for SUPPORTED: xxx1 = Play Queue xx1x = All x1xx = Reserved 1xxx = Reserved As for DATA: 0 = Off 1 = Play Queue 2 = All 3 - 14 = Reserved 15 = Data Not Available / Do Not Change |
-| 1Bh – 1Fh | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 20h | Library Data Type | | DATA | As for DATA: 0 = File 1 = Playlist Name 2 = Genre Name / Category Name 3 = Album Name 4 = Artist Name 5 = Track Name / Song Name 6 = Station Name / Channel name 7 = Station Number / Channel Number 8 = Favorite Number 9 = Play Queue 10 = Content Info 11 - 253 = Reserved 254 = Error 255 = Data Not Available |
-| 21h | Library Data Name | | DATA | Data Size: TBD |
-| 22h | Artist Name | | DATA | Data Length: TBD |
-| 23h | Album Name | | DATA | Data Length: TBD |
-| 24h | Station Name | | DATA | Data Length: TBD |
-| 25h-29h | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 2Ah | Power | | DATA | As for DATA: "00 = [No, Off, Disabled, Reset, “0”]" "01 = [Yes, On, Enabled, Set, “1”]" 10 = Error "11 = [Unavailable, Unknown]" |
-| 2Bh | Total Number of Zones available | | DATA | Range: 0 to 252 |
-| 2Ch | Zone Name | | DATA | Data Length: TBD |
-| 2Dh - 2Fh | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 30h | Main/sub switching | R/S | ZONE [8] DATA [8] | 000: All 001: Zone 1 010: Zone 2 011: Zone 3 100: Zone 4 |
-| 31h | EQ Preset Name | | DATA | Data Length: TBD |
-| 32h | Equalizer Bass | R/S | ZONE [8] DATA [8] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for DATA: Range: +/- 100% (Percent) |
-| 33h | Equalizer Treble | R/S | ZONE [8] DATA [8] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for DATA: Range:? +/- 100% (Percent) |
-| 34h | Equalizer Mid Range | R/S | ZONE [8] DATA [8] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for DATA: Range:? +/- 100% (Percent) |
-| 35h | Balance | R/S | ZONE [8] DATA [8] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for DATA: Range:? +/- 124% (Percent) |
-| 36h | Fade | R/S | ZONE [8] DATA [8] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for DATA: Range: +/- 124% (Percent) |
-| 37h | Non-Fader, Sub Volume | | ZONE [8] DATA [8] | As for ZONE: 0 = All Zones 1 = Zone 1 2 = Zone 2 3 = Zone 3 4 = Zone 4 5 ? 255 = Reserved As for DATA: Range: 0 to 100% |
-| 38h | Subwoofer direct switching | R/S | ZONE [8] DATA [8] | |
-| 39h | Center direct switching | R/S | ZONE [8] DATA [8] | |
-| 3Ah | Tone batch direct switching | R/S | ZONE [8] DATA [8] | |
-| 3Bh | Beep volume direct switching | R/S | ZONE [8] DATA [8] | |
-| 3Ch | Speed compensation | R/S | ZONE [8] DATA [8] | Enable [1] | Speed [15] |
-| 3Dh | Overhead direct switching | R/S | ZONE [8] DATA [8] | |
-| 3Eh | ANC Zone enable | R/S | ZONE [8] DATA [8] | |
-| 3Fh | Beep? | R/S | ZONE [8] DATA [8] | |
-| 40h | Voice output? | R/S | | |
-| 41h – 45h | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 46h | Number of Bluetooth Addresses available | | DATA [8] | Range: 0 to 252 |
-| 47h | Bluetooth Device Address | | INDEX [8] DATA | As for INDEX: Range: 0 to 252 As for DATA: The Bluetooth address is packaged with the first byte of the address as the most significant byte of the field. (e.g. Bluetooth address 12:34:56:78:9A:BC is packaged as 0x123456789ABC) |
-| 48h | Bluetooth Device Status | | INDEX [8] DATA [8] | As for INDEX: Range: 0 to 252 As for DATA: 0 = Connected 1 = Not Connected (In Memory) 2 = Not Paired (Available) = Error 255 = Data Not Available |
-| 49h | Bluetooth Device Name | | INDEX [8] DATA | As for INDEX: Range: 0 to 252 As for DATA: Data Length: TBD |
-| 50h | Bluetooth Pairing Status | | INDEX [8] DATA | As for INDEX: Range: 0 to 252 As for DATA: 0 = Reserved 1 = Connect 2 = Connecting (read only) 3 = Not Connected / Disconnected 13 = Unknown 14 = Error 15 = Data Not Available |
-| 51h | Forget Bluetooth Device | | INDEX [8] DATA | As for INDEX: Range: 0 to 252 As for DATA: "00 = [No, Off, Disabled, Reset, “0”]" "01 = [Yes, On, Enabled, Set, “1”]" 10 = Error "11 = [Unavailable, Unknown]" |
-| 56h | Discovering | | DATA | As for DATA: "00 = [No, Off, Disabled, Reset, “0”]" "01 = [Yes, On, Enabled, Set, “1”]" 10 = Error "11 = [Unavailable, Unknown]" |
-| 57h – 5Fh | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 60h | Channel slot assignment | R/S | CHANNEL [4] SLOT [4] | CHANNEL: Channel that will have the slot assigned. SLOT: Slot that will be assigned to channel. |
-| 61h | PLL_LOCK1 | R | PLL_LOCK [8] | The module manual of each module should specify the content of this register. All PLL locks should be map inside PLL_LOCK as a bit amp where 1 is lock and 0 is unlock. All unused bits shall remain as 1 to avoid unnecessary flags or warnings. |
-| 62h – 65h | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 66h | Input voltage | R | SENSE_IV [12] | Reports back the last read input voltage. |
-| 67h | Input current | R | SENSE_IC [12] | "If the module is capable, this register reports back the input current." |
-| 68h | Temperature input filter | R | TEMP [8] | Reports back the temperature close to the input filter |
-| 69h | Sensor generic | R | SENSOR_ID [4] DATA [12] | Each module shall specify in its amp manual what is reported back on this register. |
-| 6Ah – 6Fh | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 70h | Module enable | R/S | | Communication with module shall be allowed before this command is issued. This command will enable most of the functionality of the module and brings it into an idle state from sleep mode. |
-| 71h | Power supply enable | R/S | | Enables the main supply for the audio stage. |
-| 72h | RCA enable | R/S | | Enables RCA output |
-| 73h | Soft start | R/S | | Sets the slew rate for the soft start. |
-| 74h | Undervoltage threshold | R/S | | Provides the preferred UVP threshold for this module |
-| 75h | Overvoltage threshold | R/S | | Provides the preferred OVP threshold for this module |
-| 76h | Reserve commands for Bluetooth and Wi-Fi. | R/S | | |
-| 77h – 7Fh | Reserved | N/A | N/A | Reserved by Harman for future protocols support. |
-| 80h | Module status | R/S | ENABLE [1] VOLTAGE_LEVEL [5] OVP [1] UVP [1] OCP [1] TEMPERATURE [5] THERMAL_FB [1] THERMAL_SD [1] | This CID shall be sent on a flag event. (OVP, UVP, OCP, TFB, TSD). ENABLE device: "0 = [No, Off, Disabled, Reset, “0”]" "1 = [Yes, On, Enable, Set, “1”]" VOLTAGE_LEVEL: Range: 6.0 ? 21.0 V (step 0.5) Where: 00h represents 6V 1Eh represents 21V 1Fh represents 21V+ Over-Voltage Protection flag: "0 = [No, Off, Disabled, Reset, “0”]" "1 = [Yes, On, Enable, Set, “1”]" Under-Voltage Protection flag: "0 = [No, Off, Disabled, Reset, “0”]" "1 = [Yes, On, Enable, Set, “1”]" Over-Current Protection flag: "0 = [No, Off, Disabled, Reset, “0”]" "1 = [Yes, On, Enable, Set, “1”]" TEMPERATURE: Range: -40°C ? 175°C Thermal Foldback flag: "0 = [No, Off, Disabled, Reset, “0”]" "1 = [Yes, On, Enable, Set, “1”]" Thermal Shutdown flag: "0 = [No, Off, Disabled, Reset, “0”]" "1 = [Yes, On, Enable, Set, “1”]" |
-| 81h | Channel status | P2P | CHANNEL [4] CLIP_DET [1] SHORT [1] OPEN [1] MUTE [1] | Each bit corresponds to a channel and shows logic high for a mute channel |
-| 82h – 8Fh | Reserved | N/A | N/A | Reserved for future protocols support. |
+## 📚 Media Library Data CIDs
+| CID   | Command Name         | Device Type | Sender / Receiver | Layout | Update Rate  | Comments |
+|--------|----------------------|--------------|--------------------|--------|----------------|----------|
+| `20h` | Library Data Type     | HU           | S / R              | DATA   | Value change   | As for DATA:<br>0 = File<br>1 = Playlist Name<br>2 = Genre Name / Category Name<br>3 = Album Name<br>4 = Artist Name<br>5 = Track Name / Song Name<br>6 = Station Name / Channel name<br>7 = Station Number / Channel Number<br>8 = Favorite Number<br>9 = Play Queue<br>10 = Content Info<br>11 - 253 = Reserved<br>254 = Error<br>255 = Data Not Available |
+| `21h` | Library Data Name     | HU           | S / R              | DATA   | Value change   | Data Size: TBD |
+| `22h` | Artist Name           | HU           | S / R              | DATA   | Value change   | Data Length: TBD |
+| `23h` | Album Name            | HU           | S / R              | DATA   | Value change   | Data Length: TBD |
+| `24h` | Station Name          | HU           | S / R              | DATA   | Value change   | Data Length: TBD |
+| `25h–29h` | Reserved           | N/A          | N/A                | -      | -              | Reserved by Harman for future protocols support |
+
+## 🛠️ System and Zone CIDs
+| CID   | Command Name                     | Device Type | Sender / Receiver | Layout | Update Rate  | Comments |
+|--------|----------------------------------|--------------|--------------------|--------|----------------|----------|
+| `2Ah` | Node Enable                      | DSP          | S / R              | DATA   | Value change   | As for DATA:<br>00 = Standby<br>01 = Enabled<br>10 = Error<br>11 = Reset |
+| `2Bh` | Total Number of Zones available | DSP / HU     | S / R              | DATA   | Value change   | Range: 0 – 252 |
+| `2Ch` | Zone Name                        | HU           | S / R              | DATA   | Value change   | Character Data, Length: up to 255 bytes |
+| `2Dh–2Fh` | Reserved                     | N/A          | N/A                | -      | -              | Reserved by Harman for future protocols support |
+
+## 🎚️ Equalization CIDs
+| CID   | Command Name          | Device Type | Sender / Receiver | Layout        | Update Rate  | Comments |
+|--------|-----------------------|-------------|-------------------|---------------|--------------|----------|
+| `31h` | EQ Preset Name         | HU / DSP    | S / R             | DATA          | Value change | Char Data Length: 255 |
+| `32h` | Equalizer Bass         | HU | S / R             | ZONE [8]<br>DATA [8]     | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| |         | DSP | R             | ZONE [8]<br>DATA [8]       | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| `33h` | Equalizer Treble       | HU | S / R             | ZONE [8]<br>DATA [8]     | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| |         | DSP | R             | ZONE [8]<br>DATA [8]       | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| `34h` | Equalizer Mid Range    | HU | S / R             | ZONE [8]<br>DATA [8]     | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| |         | DSP | R             | ZONE [8]<br>DATA [8]       | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| `35h` | Balance                | HU | S / R             | ZONE [8]<br>DATA [8]     | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 124% (Percent) |
+| |         | DSP | R             | ZONE [8]<br>DATA [8]       | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 124% (Percent) |
+| `37h` | Non-Fader, Sub Volume  | HU | S / R             | ZONE [8]<br>DATA [8]     | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| |         | DSP | R             | ZONE [8]<br>DATA [8]       | Value change | **ZONE:**<br>XXXXXXX1 = Zone 1<br>XXXXXX1X = Zone 2<br>XXXXX1XX = Zone 3<br>XXXX1XXX = Zone 4<br>**DATA Range:** +/- 100% (Percent) |
+| `3Ch` | Speed compensation     | HU / DSP    | S / R             | ZONE [8], DATA [8] | Value change | Enable [1]<br>Speed [15] |
+| `3Eh` | ANC Zone enable        | HU / DSP    | S / R             | ZONE [8], DATA [8] | Value change |  |
+| `41h–45h` | Reserved            | N/A         | N/A               | -             | -            | Reserved by Harman for future protocols support |
+
+## 🔵 Bluetooth Devices CIDs
+| CID    | Command Name                  | Device Type | Sender / Receiver | Layout           | Update Rate      | Comments                                                                                 |
+|--------|------------------------------|-------------|-------------------|------------------|------------------|------------------------------------------------------------------------------------------|
+| `46h`  | Number of Bluetooth Addresses available | HU          | S / R             | DATA [8]         | At startup, Value change | Range: 0 to 252                                                                        |
+| `47h`  | Bluetooth Device Address      | HU / DSP    | S / R             | INDEX [8], DATA  | At startup, Value change | As for INDEX:<br>Range:<br>0 to 252<br>As for DATA:<br>The Bluetooth address is packaged with the first byte of the address as the most significant byte of the field.<br>(e.g.<br>Bluetooth address 12:34:56:78:9A:BC is packaged as 0x123456789ABC) |
+| `48h`  | Bluetooth Device Status       | HU / DSP    | S / R             | INDEX [8], DATA [8] | At startup, Value change | **INDEX:** Range 0 to 252<br>**DATA:**<br>0 = Connected<br>1 = Not Connected (In Memory)<br>2 = Not Paired (Available) = Error<br>255 = Data Not Available |
+| `49h`  | Bluetooth Device Name         | HU / DSP    | S / R             | INDEX [8], DATA  | At startup, Value change | **INDEX:** Range 0 to 252<br>Char Data Length: 255                                      |
+| `50h`  | Bluetooth Pairing Status      | HU / DSP    | S / R             | INDEX [8], DATA [8] | Value change      | **INDEX:** Range 0 to 252<br>**DATA:**<br>0 = Reserved<br>1 = Connect<br>2 = Connecting (read only)<br>3 = Not Connected / Disconnected<br>13 = Unknown (Default)<br>14 = Error<br>15 = Data Not Available |
+| `51h`  | Forget Bluetooth Device       | HU / DSP    | S / R             | INDEX [8], DATA [8] | Value change      | **INDEX:** Range 0 to 252<br>**DATA:**<br>00 = No / Off / Disabled / Reset / “0”<br>01 = Yes / On / Enabled / Set / “1”<br>10 = Error<br>11 = Unavailable / Unknown |
+| `56h`  | Discovering                  | HU / DSP    | S / R             | DATA [8]         | At startup, Value change | **DATA:**<br>00 = No / Off / Disabled / Reset / “0”<br>01 = Yes / On / Enabled / Set / “1”<br>10 = Error<br>11 = Unavailable / Unknown |
+| `57h - 5Fh` | Reserved                 | N/A         | N/A               | -                | -                | Reserved by Harman for future protocols support                                         |
+
+# Audio Configuration CIDs
+| CID      | Command Name          | Device Type | S / R | Data Format        | Value Change | Description                                              |
+|----------|-----------------------|-------------|-------|--------------------|--------------|----------------------------------------------------------|
+| 60h      | Channel slot assignment | HU          | S / R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |
+|      |  | DSP          | S / R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |
+|      |  | AMP          | R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |
+| 62h-65h  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
+
+# Sensor CIDs
+| CID      | Command Name          | Device Type | S / R | Data Format        | Value Change | Description                                              |
+|----------|-----------------------|-------------|-------|--------------------|--------------|----------------------------------------------------------|
+| 66h      | Input voltage         | ALL         | R     | SENSE_IV [12]      | Under request| Reports back the last read input voltage.                |
+| 67h      | Input current         | ALL         | R     | SENSE_IC [12]      | Under request| If the module is capable, this register reports back the input current. |
+| 68h      | Temperature input filter | ALL       | R     | TEMP [8]           | Under request| Reports back the temperature close to the input filter.  |
+| 69h      | Sensor generic        | ALL         | R     | SENSOR_ID [4], DATA [12] | Under request| Each module shall specify in its amp manual what is reported back on this register. |
+|          |                       | DSP         | S / R |                    |              |                                                          |
+| 6Ah-6Fh  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
+
+# Module Configuration CIDs
+| CID      | Command Name          | Device Type | S / R | Data Format        | Value Change | Description                                              |
+|----------|-----------------------|-------------|-------|--------------------|--------------|----------------------------------------------------------|
+| 70h      | Module enable         | ALL         | R     | ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |
+|          |                       | DSP         | S / R |   ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |
+|          |                       | HU          | S / R | ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |
+| 77h-7Fh  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
+
+# Protection and Diagnostics CIDs
+| CID    | Command Name           | Device Type | S / R | Data Format                  | Value Change           | Description                                                                                   |
+|--------|------------------------|-------------|-------|------------------------------|-----------------------|-----------------------------------------------------------------------------------------------|
+| 80h    | Module status          | ALL         | S / R | ENABLE [1], VOLTAGE_LEVEL [5], OVP [1], UVP [1], OCP [1], TEMPERATURE [5], THERMAL_FB [1], THERMAL_SD [1] | On flag event (OVP, UVP, OCP, TFB, TSD) | - **ENABLE device:** <br> 0 = No/Off/Disabled/Reset/"0"<br> 1 = Yes/On/Enable/Set/"1" <br><br> - **VOLTAGE_LEVEL:** Range 6.0 – 21.0 V (step 0.5) <br> 00h = 6V, 1Eh = 21V, 1Fh = 21V+ <br><br> - **Over-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Under-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Over-Current Protection flag:** 0 = No, 1 = Yes <br><br> - **TEMPERATURE:** Range -40°C to 175°C <br><br> - **Thermal Foldback flag:** 0 = No, 1 = Yes <br> - **Thermal Shutdown flag:** 0 = No, 1 = Yes |
+| | | DSP<br>HU         | R | ENABLE [1], VOLTAGE_LEVEL [5], OVP [1], UVP [1], OCP [1], TEMPERATURE [5], THERMAL_FB [1], THERMAL_SD [1] | On flag event (OVP, UVP, OCP, TFB, TSD) | - **ENABLE device:** <br> 0 = No/Off/Disabled/Reset/"0"<br> 1 = Yes/On/Enable/Set/"1" <br><br> - **VOLTAGE_LEVEL:** Range 6.0 – 21.0 V (step 0.5) <br> 00h = 6V, 1Eh = 21V, 1Fh = 21V+ <br><br> - **Over-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Under-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Over-Current Protection flag:** 0 = No, 1 = Yes <br><br> - **TEMPERATURE:** Range -40°C to 175°C <br><br> - **Thermal Foldback flag:** 0 = No, 1 = Yes <br> - **Thermal Shutdown flag:** 0 = No, 1 = Yes |
+| 81h    | Channel clip detection | AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16
+| 82h    | Channel short detection| AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16
+| 83h    | Channel open detection | AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16
+| 84h    | SHARC status           | DSP         | R     | Status_OK [1]                | Periodic 5s           | OR condition of all HW diagnostics from SHARC chipset<br>- PLL_LOCK [1]<br>- Core_Status_Register [1]<br>0 = Not OK<br>1 = OK |
+| 85h-8Fh| Reserved               | N/A         | N/A   | N/A                         | N/A                   | Reserved for future protocols support |
+
 
 # 9 Module functions capability
 
@@ -1102,137 +1144,3 @@ sequenceDiagram
 
     - UID Table을 구축한 후 Running 상태로 전환되어 각 노드와 주기적으로 다양한 CID 요청과 응답을 처리합니다.  
 
-다음 C코드는 윈도우에서 Visual Studio 로 컴파일 후 실행 가능하며 4바이트의 mailbox 에 담아서 Sub node 에게 socket 통신을 통해서 보내도록 하는 코드이다.
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <winsock2.h>
-
-#pragma comment(lib, "ws2_32.lib")
-
-#define MAX_DATA_SIZE 100
-#define MAX_MAILBOX_SIZE 4
-
-uint8_t Mailbox[MAX_MAILBOX_SIZE];
-uint8_t MailboxIndex = 0;
-
-typedef struct {
-    uint8_t UID;
-    uint8_t CID;
-    uint8_t* Data;
-    uint8_t L_SIZE;
-} AppPacket;
-
-void WriteToMailbox(uint8_t byte, SOCKET sock) {
-    Mailbox[MailboxIndex++] = byte;
-
-    if (MailboxIndex == MAX_MAILBOX_SIZE) {
-        send(sock, (const char*)Mailbox, MAX_MAILBOX_SIZE, 0);
-        printf("Sent Mailbox: ");
-        for (int i = 0; i < MAX_MAILBOX_SIZE; i++) {
-            printf("0x%02X ", Mailbox[i]);
-        }
-        printf("\n");
-        MailboxIndex = 0;
-    }
-}
-
-void CreateA2BFrames(AppPacket* packet, SOCKET sock) {
-    uint8_t L = packet->L_SIZE;
-
-    if (L <= 2) {
-        uint8_t header = 0x7F & L;
-        WriteToMailbox(header, sock);
-        WriteToMailbox(packet->CID, sock);
-        WriteToMailbox(L > 0 ? packet->Data[0] : 0x00, sock);
-        WriteToMailbox(L > 1 ? packet->Data[1] : 0x00, sock);
-    } else {
-        uint8_t header = 0x7F & L;
-        WriteToMailbox(header, sock);
-        WriteToMailbox(packet->CID, sock);
-        WriteToMailbox(packet->Data[0], sock);
-        WriteToMailbox(packet->Data[1], sock);
-
-        uint8_t multiCount = (L - 2 + 2) / 3;
-        uint8_t dataIndex = 2;
-
-        for (uint8_t counter = 1; counter <= multiCount; counter++) {
-            uint8_t header = 0x80 | counter;
-            WriteToMailbox(header, sock);
-
-            for (int i = 0; i < 3; i++) {
-                if (dataIndex < L) {
-                    WriteToMailbox(packet->Data[dataIndex++], sock);
-                } else {
-                    WriteToMailbox(0x00, sock);
-                }
-            }
-        }
-    }
-}
-
-int main() {
-    WSADATA wsa;
-    SOCKET s;
-    struct sockaddr_in server;
-
-    printf("Initializing Winsock...\n");
-    if (WSAStartup(MAKEWORD(2,2), &wsa) != 0) {
-        printf("Failed. Error Code: %d\n", WSAGetLastError());
-        return 1;
-    }
-
-    if ((s = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
-        printf("Could not create socket. Error: %d\n", WSAGetLastError());
-        return 1;
-    }
-
-    server.sin_addr.s_addr = inet_addr("127.0.0.1");
-    server.sin_family = AF_INET;
-    server.sin_port = htons(12345);
-
-    if (connect(s, (struct sockaddr*)&server, sizeof(server)) < 0) {
-        printf("Connection failed\n");
-        return 1;
-    }
-
-    printf("Connected to server.\n");
-
-    uint8_t UID, CID, data[MAX_DATA_SIZE];
-    char dataLine[512];
-    int count = 0;
-
-    printf("Enter UID (e.g. 0xAB): ");
-    scanf("%hhx", &UID);
-
-    printf("Enter CID (e.g. 0x01): ");
-    scanf("%hhx", &CID);
-    getchar(); // consume newline
-
-    printf("Enter Data (hex, space-separated, e.g. 11 22 33 44):\n");
-    fgets(dataLine, sizeof(dataLine), stdin);
-
-    char* token = strtok(dataLine, " ");
-    while (token && count < MAX_DATA_SIZE) {
-        if (sscanf(token, "%hhx", &data[count]) == 1) {
-            count++;
-        }
-        token = strtok(NULL, " ");
-    }
-
-    AppPacket packet = {
-        .UID = UID,
-        .CID = CID,
-        .Data = data,
-        .L_SIZE = count
-    };
-
-    CreateA2BFrames(&packet, s);
-
-    closesocket(s);
-    WSACleanup();
-
-    return 0;
-}
