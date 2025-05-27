@@ -381,9 +381,21 @@ void printCIDDescription(uint8_t cid) {
             printf("Module Status");
             cidType = CID_TYPE_MODULE_STATUS;
             break;
-        case CID_CHANNEL_STATUS:
-            printf("Channel Status");
-            cidType = CID_TYPE_CHANNEL_STATUS;
+        case CID_CHANNEL_CLIP:
+            printf("Channel Clip Detection");
+            cidType = CID_TYPE_CHANNEL_CLIP;
+            break;
+        case CID_CHANNEL_SHORT:
+            printf("Channel Short Detection");
+            cidType = CID_TYPE_CHANNEL_SHORT;
+            break;
+        case CID_CHANNEL_OPEN:
+            printf("Channel Open Detection");
+            cidType = CID_TYPE_CHANNEL_OPEN;
+            break;
+        case CID_SHARC_STATUS:
+            printf("SHARC Status");
+            cidType = CID_TYPE_SHARC_STATUS;
             break;
 
         default:
@@ -809,10 +821,28 @@ void generateDefaultData(uint8_t cid, uint8_t* data, uint8_t* length, char* comm
             *length = 2;
             strcpy(comment, "Reporting module status: Enabled, UVP active, Temperature level 9");
             break;
-        case CID_CHANNEL_STATUS:
-            data[0] = 0x10;  // Channel 1, Clip=0, Short=0, Open=0, Mute=0
+        case CID_CHANNEL_CLIP:
+            data[0] = 0x00;  // High byte of bitmap
+            data[1] = 0x05;  // Low byte: channels 1 and 3 clipping
+            *length = 2;
+            strcpy(comment, "Reporting channel clip: Channels 1 and 3 clipping");
+            break;
+        case CID_CHANNEL_SHORT:
+            data[0] = 0x00;  // High byte of bitmap
+            data[1] = 0x10;  // Low byte: channel 5 short circuit
+            *length = 2;
+            strcpy(comment, "Reporting channel short: Channel 5 short circuit");
+            break;
+        case CID_CHANNEL_OPEN:
+            data[0] = 0x00;  // High byte of bitmap
+            data[1] = 0x20;  // Low byte: channel 6 open circuit
+            *length = 2;
+            strcpy(comment, "Reporting channel open: Channel 6 open circuit");
+            break;
+        case CID_SHARC_STATUS:
+            data[0] = 0x01;  // Status OK
             *length = 1;
-            strcpy(comment, "Reporting channel 1 status: No issues");
+            strcpy(comment, "Reporting SHARC status: All systems OK");
             break;
 
         default:
@@ -857,7 +887,10 @@ void displayMenu() {
     printf("\nModule commands (0x70-0x8F):\n");
     printf("  70. Module Enable (0x70)\n");
     printf("  80. Module Status (0x80)\n");
-    printf("  81. Channel Status (0x81)\n");
+    printf("  81. Channel Clip Detection (0x81)\n");
+    printf("  82. Channel Short Detection (0x82)\n");
+    printf("  83. Channel Open Detection (0x83)\n");
+    printf("  84. SHARC Status (0x84)\n");
     
     printf("\nUtilities:\n");
     printf("  90. Show All Available CIDs\n");
@@ -956,8 +989,11 @@ void showAllCIDs() {
     
     printf("\nProtection and diagnostics CIDs (0x80-0x8F):\n");
     printf("  0x80: Module Status\n");
-    printf("  0x81: Channel Status\n");
-    printf("  0x82-0x8F: Reserved\n");
+    printf("  0x81: Channel Clip Detection\n");
+    printf("  0x82: Channel Short Detection\n");
+    printf("  0x83: Channel Open Detection\n");
+    printf("  0x84: SHARC Status\n");
+    printf("  0x85-0x8F: Reserved\n");
     
     printf("\nPress Enter to return to main menu...");
     getchar();  // Wait for Enter key
@@ -1029,7 +1065,10 @@ uint8_t getCIDType(uint8_t cid) {
         case CID_OVERVOLTAGE_THRESHOLD: cidType = CID_TYPE_OVERVOLTAGE_THRESHOLD; break;
         case CID_BT_WIFI_RESERVED: cidType = CID_TYPE_BT_WIFI_RESERVED; break;
         case CID_MODULE_STATUS: cidType = CID_TYPE_MODULE_STATUS; break;
-        case CID_CHANNEL_STATUS: cidType = CID_TYPE_CHANNEL_STATUS; break;
+        case CID_CHANNEL_CLIP: cidType = CID_TYPE_CHANNEL_CLIP; break;
+        case CID_CHANNEL_SHORT: cidType = CID_TYPE_CHANNEL_SHORT; break;
+        case CID_CHANNEL_OPEN: cidType = CID_TYPE_CHANNEL_OPEN; break;
+        case CID_SHARC_STATUS: cidType = CID_TYPE_SHARC_STATUS; break;
         default: cidType = 0; break;
     }
     
@@ -1166,7 +1205,10 @@ int main() {
                 case 61: cid = CID_PLL_LOCK_STATUS; break;
                 case 70: cid = CID_MODULE_ENABLE; break;
                 case 80: cid = CID_MODULE_STATUS; break;
-                case 81: cid = CID_CHANNEL_STATUS; break;
+                case 81: cid = CID_CHANNEL_CLIP; break;
+                case 82: cid = CID_CHANNEL_SHORT; break;
+                case 83: cid = CID_CHANNEL_OPEN; break;
+                case 84: cid = CID_SHARC_STATUS; break;
                 default:
                     printf("Invalid choice. Please try again.\n");
                     continue;

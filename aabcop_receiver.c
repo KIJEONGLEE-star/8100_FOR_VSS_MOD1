@@ -740,20 +740,109 @@ void printCIDInfo(uint8_t cid, uint8_t* data, uint8_t dataLen) {
             }
             break;
             
-        case CID_CHANNEL_STATUS:
-            printf("Channel Status\n");
-            if (dataLen >= 1) {
-                uint8_t channel = (data[0] >> 4) & 0x0F;
-                uint8_t clipDet = (data[0] >> 3) & 0x01;
-                uint8_t shortCircuit = (data[0] >> 2) & 0x01;
-                uint8_t openCircuit = (data[0] >> 1) & 0x01;
-                uint8_t mute = data[0] & 0x01;
+        case CID_CHANNEL_CLIP:
+            printf("Channel Clip Detection\n");
+            if (dataLen >= 2) {
+                uint16_t bitMap = (data[0] << 8) | data[1];
+                printf("Channel clip bitmap: 0x%04X (", bitMap);
+                for (int i = 0; i < 16; i++) {
+                    if (bitMap & (1 << (15 - i)))
+                        printf("1");
+                    else
+                        printf("0");
+                    
+                    if (i % 4 == 3 && i < 15)
+                        printf(" ");
+                }
+                printf(")\n");
                 
-                printf("Channel: %d\n", channel);
-                printf("Clip Detected: %d (%s)\n", clipDet, clipDet ? "Yes" : "No");
-                printf("Short Circuit: %d (%s)\n", shortCircuit, shortCircuit ? "Yes" : "No");
-                printf("Open Circuit: %d (%s)\n", openCircuit, openCircuit ? "Yes" : "No");
-                printf("Mute: %d (%s)\n", mute, mute ? "Muted" : "Unmuted");
+                // Print which channels have clip detection
+                printf("Clipping channels: ");
+                int hasClippingChannels = 0;
+                for (int i = 0; i < 16; i++) {
+                    if (bitMap & (1 << i)) {
+                        printf("%d ", i + 1);
+                        hasClippingChannels = 1;
+                    }
+                }
+                if (!hasClippingChannels) {
+                    printf("None");
+                }
+                printf("\n");
+            }
+            break;
+            
+        case CID_CHANNEL_SHORT:
+            printf("Channel Short Detection\n");
+            if (dataLen >= 2) {
+                uint16_t bitMap = (data[0] << 8) | data[1];
+                printf("Channel short bitmap: 0x%04X (", bitMap);
+                for (int i = 0; i < 16; i++) {
+                    if (bitMap & (1 << (15 - i)))
+                        printf("1");
+                    else
+                        printf("0");
+                    
+                    if (i % 4 == 3 && i < 15)
+                        printf(" ");
+                }
+                printf(")\n");
+                
+                // Print which channels have short detection
+                printf("Shorted channels: ");
+                int hasShortedChannels = 0;
+                for (int i = 0; i < 16; i++) {
+                    if (bitMap & (1 << i)) {
+                        printf("%d ", i + 1);
+                        hasShortedChannels = 1;
+                    }
+                }
+                if (!hasShortedChannels) {
+                    printf("None");
+                }
+                printf("\n");
+            }
+            break;
+            
+        case CID_CHANNEL_OPEN:
+            printf("Channel Open Detection\n");
+            if (dataLen >= 2) {
+                uint16_t bitMap = (data[0] << 8) | data[1];
+                printf("Channel open bitmap: 0x%04X (", bitMap);
+                for (int i = 0; i < 16; i++) {
+                    if (bitMap & (1 << (15 - i)))
+                        printf("1");
+                    else
+                        printf("0");
+                    
+                    if (i % 4 == 3 && i < 15)
+                        printf(" ");
+                }
+                printf(")\n");
+                
+                // Print which channels have open detection
+                printf("Open channels: ");
+                int hasOpenChannels = 0;
+                for (int i = 0; i < 16; i++) {
+                    if (bitMap & (1 << i)) {
+                        printf("%d ", i + 1);
+                        hasOpenChannels = 1;
+                    }
+                }
+                if (!hasOpenChannels) {
+                    printf("None");
+                }
+                printf("\n");
+            }
+            break;
+            
+        case CID_SHARC_STATUS:
+            printf("SHARC Status\n");
+            if (dataLen >= 1) {
+                uint8_t statusOK = data[0] & 0x01;
+                printf("Status OK: %d (%s)\n", statusOK, statusOK ? "OK" : "Not OK");
+                printf("PLL_LOCK and Core_Status_Register ORed condition: %s\n", 
+                       statusOK ? "No issues detected" : "Issues detected");
             }
             break;
             
@@ -838,6 +927,41 @@ void generateDefaultData(uint8_t cid, uint8_t* data, uint8_t* length, char* comm
             data[1] = 0x03;  // Status: Not Connected / Disconnected
             *length = 2;
             strcpy(comment, "Bluetooth device 0 is not connected");
+            break;
+            
+        // Module status CIDs
+        case CID_MODULE_STATUS:
+            data[0] = 0x80;  // Enable=1, Voltage Level=0, OVP=0, UVP=0
+            data[1] = 0x00;  // OCP=0, Temperature=0, Thermal Foldback=0, Thermal Shutdown=0
+            *length = 2;
+            strcpy(comment, "Module status: Enabled, no protection events");
+            break;
+            
+        case CID_CHANNEL_CLIP:
+            data[0] = 0x00;  // High byte of bitmap
+            data[1] = 0x05;  // Low byte: channels 1 and 3 clipping
+            *length = 2;
+            strcpy(comment, "Reporting channel clip: Channels 1 and 3 clipping");
+            break;
+            
+        case CID_CHANNEL_SHORT:
+            data[0] = 0x00;  // High byte of bitmap
+            data[1] = 0x12;  // Low byte: channels 2 and 5 shorted
+            *length = 2;
+            strcpy(comment, "Reporting channel short: Channels 2 and 5 shorted");
+            break;
+            
+        case CID_CHANNEL_OPEN:
+            data[0] = 0x00;  // High byte of bitmap
+            data[1] = 0x40;  // Low byte: channel 7 open
+            *length = 2;
+            strcpy(comment, "Reporting channel open: Channel 7 open");
+            break;
+            
+        case CID_SHARC_STATUS:
+            data[0] = 0x01;  // Status OK (1 = OK, 0 = Not OK)
+            *length = 1;
+            strcpy(comment, "SHARC status is OK (no issues detected)");
             break;
             
         // Default response for any CID
@@ -1075,7 +1199,10 @@ uint8_t getCIDType(uint8_t cid) {
         case CID_OVERVOLTAGE_THRESHOLD: cidType = CID_TYPE_OVERVOLTAGE_THRESHOLD; break;
         case CID_BT_WIFI_RESERVED: cidType = CID_TYPE_BT_WIFI_RESERVED; break;
         case CID_MODULE_STATUS: cidType = CID_TYPE_MODULE_STATUS; break;
-        case CID_CHANNEL_STATUS: cidType = CID_TYPE_CHANNEL_STATUS; break;
+        case CID_CHANNEL_CLIP: cidType = CID_TYPE_CHANNEL_CLIP; break;
+        case CID_CHANNEL_SHORT: cidType = CID_TYPE_CHANNEL_SHORT; break;
+        case CID_CHANNEL_OPEN: cidType = CID_TYPE_CHANNEL_OPEN; break;
+        case CID_SHARC_STATUS: cidType = CID_TYPE_SHARC_STATUS; break;
         default: cidType = 0; break;
     }
     

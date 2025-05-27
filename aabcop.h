@@ -157,9 +157,15 @@
 // Protection and diagnostics CIDs (0x80-0x8F)
 #define CID_MODULE_STATUS    0x80
 #define CID_TYPE_MODULE_STATUS CID_TYPE_R
-#define CID_CHANNEL_STATUS   0x81
-#define CID_TYPE_CHANNEL_STATUS CID_TYPE_R
-// 0x82-0x8F are reserved
+#define CID_CHANNEL_CLIP     0x81
+#define CID_TYPE_CHANNEL_CLIP CID_TYPE_RS
+#define CID_CHANNEL_SHORT    0x82
+#define CID_TYPE_CHANNEL_SHORT CID_TYPE_RS
+#define CID_CHANNEL_OPEN     0x83
+#define CID_TYPE_CHANNEL_OPEN CID_TYPE_RS
+#define CID_SHARC_STATUS     0x84
+#define CID_TYPE_SHARC_STATUS CID_TYPE_R
+// 0x85-0x8F are reserved
 
 // Response command status codes
 #define RSP_STATUS_COMPLETION    0
