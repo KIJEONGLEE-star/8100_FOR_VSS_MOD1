@@ -888,7 +888,7 @@ A Response Command (01h) shall be sent after execution of CID; it does not matte
 In case of Request Info (02h) reception, the node shall response with the corresponding CID Layout requested.
 The message catalog file has the complete list of messages that are expected to be transmitted over the network.
 
-## 📡 Network Generic CIDs
+## Network Generic CIDs
 | CID       | Command Name             | Device Type | Sender / Receiver              | Layout          | Update Rate                        | Comments |
 |-----------|--------------------------|--------------|-------------------------------|------------------|------------------------------------|----------|
 | `00h`     | Network startup/validation | DSP          | BCST                          | UID [8]          | At startup                         | This CID verifies the configured network. Should be sent as a broadcast message at startup by the Main node. Every sub-node should respond with its UID. <br><br>**UID:**<br>0: Unknown<br>XX: See Unit Identifiers mapping Table |
@@ -900,7 +900,7 @@ The message catalog file has the complete list of messages that are expected to 
 |           |                          | AMP          | R                             |  Error type [8]   | Value change                       | **Error type:**<br>0: None<br>1: Error at Sender<br>2: Error at Receiver |
 | `04h–0Fh` | Reserved                 | N/A          | N/A                           |                  |                                    | Reserved by Harman for future protocols support |
 
-## 🎧 Audio Control CIDs
+## Audio Control CIDs
 | CID   | Command Name                     | Device Type | Sender / Receiver | Layout                              | Update Rate   | Comments |
 |--------|----------------------------------|--------------|--------------------|--------------------------------------|----------------|----------|
 | `10h` | Audio/Video Source Name          | DSP          | R                  | DATA                                 | Value change   | Sent on event by the Audio Host whenever the Audio Source changes. <br><br>**DATA:**<br>Data Length: TBD |
@@ -917,7 +917,7 @@ The message catalog file has the complete list of messages that are expected to 
 | `1Ah` | Shuffle Support                  | HU           | S / R              | SUPPORTED [4]<br>STATUS [4]          | Value change   | As for SUPPORTED:<br>xxx1 = Play Queue<br>xx1x = All<br>x1xx = Reserved<br>1xxx = Reserved<br>As for DATA:<br>0 = Off<br>1 = Play Queue<br>2 = All<br>3 - 14 = Reserved<br>15 = Data Not Available / Do Not Change |
 | `1Bh–1Fh` | Reserved                     | N/A          | N/A                | -                                    | -              | Reserved by Harman for future protocols support |
 
-## 📚 Media Library Data CIDs
+## Media Library Data CIDs
 | CID   | Command Name         | Device Type | Sender / Receiver | Layout | Update Rate  | Comments |
 |--------|----------------------|--------------|--------------------|--------|----------------|----------|
 | `20h` | Library Data Type     | HU           | S / R              | DATA   | Value change   | As for DATA:<br>0 = File<br>1 = Playlist Name<br>2 = Genre Name / Category Name<br>3 = Album Name<br>4 = Artist Name<br>5 = Track Name / Song Name<br>6 = Station Name / Channel name<br>7 = Station Number / Channel Number<br>8 = Favorite Number<br>9 = Play Queue<br>10 = Content Info<br>11 - 253 = Reserved<br>254 = Error<br>255 = Data Not Available |
@@ -927,7 +927,7 @@ The message catalog file has the complete list of messages that are expected to 
 | `24h` | Station Name          | HU           | S / R              | DATA   | Value change   | Data Length: TBD |
 | `25h–29h` | Reserved           | N/A          | N/A                | -      | -              | Reserved by Harman for future protocols support |
 
-## 🛠️ System and Zone CIDs
+## System and Zone CIDs
 | CID   | Command Name                     | Device Type | Sender / Receiver | Layout | Update Rate  | Comments |
 |--------|----------------------------------|--------------|--------------------|--------|----------------|----------|
 | `2Ah` | Node Enable                      | DSP          | S / R              | DATA   | Value change   | As for DATA:<br>00 = Standby<br>01 = Enabled<br>10 = Error<br>11 = Reset |
@@ -935,7 +935,7 @@ The message catalog file has the complete list of messages that are expected to 
 | `2Ch` | Zone Name                        | HU           | S / R              | DATA   | Value change   | Character Data, Length: up to 255 bytes |
 | `2Dh–2Fh` | Reserved                     | N/A          | N/A                | -      | -              | Reserved by Harman for future protocols support |
 
-## 🎚️ Equalization CIDs
+## Equalization CIDs
 | CID   | Command Name          | Device Type | Sender / Receiver | Layout        | Update Rate  | Comments |
 |--------|-----------------------|-------------|-------------------|---------------|--------------|----------|
 | `31h` | EQ Preset Name         | HU / DSP    | S / R             | DATA          | Value change | Char Data Length: 255 |
@@ -953,7 +953,7 @@ The message catalog file has the complete list of messages that are expected to 
 | `3Eh` | ANC Zone enable        | HU / DSP    | S / R             | ZONE [8], DATA [8] | Value change |  |
 | `41h–45h` | Reserved            | N/A         | N/A               | -             | -            | Reserved by Harman for future protocols support |
 
-## 🔵 Bluetooth Devices CIDs
+## Bluetooth Devices CIDs
 | CID    | Command Name                  | Device Type | Sender / Receiver | Layout           | Update Rate      | Comments                                                                                 |
 |--------|------------------------------|-------------|-------------------|------------------|------------------|------------------------------------------------------------------------------------------|
 | `46h`  | Number of Bluetooth Addresses available | HU          | S / R             | DATA [8]         | At startup, Value change | Range: 0 to 252                                                                        |
