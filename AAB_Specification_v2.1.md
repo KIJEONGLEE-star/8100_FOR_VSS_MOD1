@@ -1072,14 +1072,14 @@ The message catalog file has the complete list of messages that are expected to 
 | 66h      | Input voltage         | ALL         | R     | SENSE_IV [12]      | Under request| Reports back the last read input voltage.                |case #1 수행|
 | 67h      | Input current         | ALL         | R     | SENSE_IC [12]      | Under request| If the module is capable, this register reports back the input current. |case #1 수행|
 | 68h      | Temperature input filter | ALL       | R     | TEMP [8]           | Under request| Reports back the temperature close to the input filter.  |case #1 수행|
-| 69h      | Sensor generic        | ALL except DSP | R     | SENSOR_ID [4], DATA [12] | Under request| Each module shall specify in its amp manual what is reported back on this register. |case #1 수행|
+| 69h      | Sensor generic        | ALL (not DSP)  | R     | SENSOR_ID [4], DATA [12] | Under request| Each module shall specify in its amp manual what is reported back on this register. |case #1 수행|
 | 69h      | Sensor generic        | DSP         | S / R | SENSOR_ID [4], DATA [12] | Under request| Each module shall specify in its amp manual what is reported back on this register. |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행 |
 | 6Ah-6Fh  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
 
 ## Module Configuration CIDs
 | CID       | Command Name               | Device Type       | Sender / Receiver | Layout         | Update Rate | Comments | Example |
 |-----------|----------------------------|-------------------|-------------------|----------------|--------------|----------|---------|
-| 70h      | Module enable         | ALL except DSP / HU | R     | ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |case #1수행|
+| 70h      | Module enable         | ALL (not HU, not DSP)  | R     | ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |case #1수행|
 | 70h      | Module enable         | DSP / HU         | S / R |   ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
 | 77h-7Fh  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
 
