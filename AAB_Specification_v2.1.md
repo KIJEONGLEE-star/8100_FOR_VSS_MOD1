@@ -1048,30 +1048,22 @@ The message catalog file has the complete list of messages that are expected to 
 ## Bluetooth Devices CIDs
 | CID       | Command Name               | Device Type       | Sender / Receiver | Layout         | Update Rate | Comments | Example |
 |-----------|----------------------------|-------------------|-------------------|----------------|--------------|----------|---------|
-| `46h`  | Number of Bluetooth Addresses available | HU          | S / R             | DATA [8]         | At startup, Value change | Range: 0 to 252                                                                        |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| `47h`  | Bluetooth Device Address      | HU / DSP    | S / R             | INDEX [8], DATA  | At startup, Value change | As for INDEX:<br>Range:<br>0 to 252<br>As for DATA:<br>The Bluetooth address is packaged with the first byte of the address as the most significant byte of the field.<br>(e.g.<br>Bluetooth address 12:34:56:78:9A:BC is packaged as 0x123456789ABC) |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| `48h`  | Bluetooth Device Status       | HU / DSP    | S / R             | INDEX [8], DATA [8] | At startup, Value change | **INDEX:** Range 0 to 252<br>**DATA:**<br>0 = Connected<br>1 = Not Connected (In Memory)<br>2 = Not Paired (Available) = Error<br>255 = Data Not Available |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| `49h`  | Bluetooth Device Name         | HU / DSP    | S / R             | INDEX [8], DATA  | At startup, Value change | **INDEX:** Range 0 to 252<br>Char Data Length: 255                                      |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| `50h`  | Bluetooth Pairing Status      | HU / DSP    | S / R             | INDEX [8], DATA [8] | Value change      | **INDEX:** Range 0 to 252<br>**DATA:**<br>0 = Reserved<br>1 = Connect<br>2 = Connecting (read only)<br>3 = Not Connected / Disconnected<br>13 = Unknown (Default)<br>14 = Error<br>15 = Data Not Available |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
+| `46h`  | Number of Bluetooth Addresses available | HU          | S / R             | DATA [8]         | At startup, Value change | Range: 0 to 252     |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행 |
+| `47h`  | Bluetooth Device Address      | HU / DSP    | S / R             | INDEX [8], DATA  | At startup, Value change | As for INDEX:<br>Range:<br>0 to 252<br>As for DATA:<br>The Bluetooth address is packaged with the first byte of the address as the most significant byte of the field.<br>(e.g.<br>Bluetooth address 12:34:56:78:9A:BC is packaged as 0x123456789ABC) |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
+| `48h`  | Bluetooth Device Status       | HU / DSP    | S / R             | INDEX [8], DATA [8] | At startup, Value change | **INDEX:** Range 0 to 252<br>**DATA:**<br>0 = Connected<br>1 = Not Connected (In Memory)<br>2 = Not Paired (Available) = Error<br>255 = Data Not Available |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행 |
+| `49h`  | Bluetooth Device Name         | HU / DSP    | S / R             | INDEX [8], DATA  | At startup, Value change | **INDEX:** Range 0 to 252<br>Char Data Length: 255                                      |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행 |
+| `50h`  | Bluetooth Pairing Status      | HU / DSP    | S / R             | INDEX [8], DATA [8] | Value change      | **INDEX:** Range 0 to 252<br>**DATA:**<br>0 = Reserved<br>1 = Connect<br>2 = Connecting (read only)<br>3 = Not Connected / Disconnected<br>13 = Unknown (Default)<br>14 = Error<br>15 = Data Not Available |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
 | `51h`  | Forget Bluetooth Device       | HU / DSP    | S / R             | INDEX [8], DATA [8] | Value change      | **INDEX:** Range 0 to 252<br>**DATA:**<br>00 = No / Off / Disabled / Reset / “0”<br>01 = Yes / On / Enabled / Set / “1”<br>10 = Error<br>11 = Unavailable / Unknown |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| `56h`  | Discovering                   | HU / DSP    | S / R             | DATA [8]         | At startup, Value change | **DATA:**<br>00 = No / Off / Disabled / Reset / “0”<br>01 = Yes / On / Enabled / Set / “1”<br>10 = Error<br>11 = Unavailable / Unknown |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
+'S' 선택시 : case #2 수행|
+| `56h`  | Discovering                   | HU / DSP    | S / R             | DATA [8]         | At startup, Value change | **DATA:**<br>00 = No / Off / Disabled / Reset / “0”<br>01 = Yes / On / Enabled / Set / “1”<br>10 = Error<br>11 = Unavailable / Unknown |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
 | `57h - 5Fh` | Reserved                 | N/A         | N/A               | -                | -                | Reserved by Harman for future protocols support                                         |
 
 ## Audio Configuration CIDs
 | CID       | Command Name               | Device Type       | Sender / Receiver | Layout         | Update Rate | Comments | Example |
 |-----------|----------------------------|-------------------|-------------------|----------------|--------------|----------|---------|
-| 60h      | Channel slot assignment | HU          | S / R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| 60h      | Channel slot assignment | DSP          | S / R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| 60h      | Channel slot assignment | AMP          | R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |case #1 수행 <br><br>|
+| 60h      | Channel slot assignment | HU          | S / R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
+| 60h      | Channel slot assignment | DSP          | S / R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행 |
+| 60h      | Channel slot assignment | AMP          | R | CHANNEL [4], SLOT [4] | At startup   | - **CHANNEL:** Channel that will have the slot assigned.<br>- **SLOT:** Slot that will be assigned to channel. |case #1 수행|
 | 62h-65h  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
 
 ## Sensor CIDs
@@ -1081,31 +1073,25 @@ The message catalog file has the complete list of messages that are expected to 
 | 67h      | Input current         | ALL         | R     | SENSE_IC [12]      | Under request| If the module is capable, this register reports back the input current. |case #1 수행|
 | 68h      | Temperature input filter | ALL       | R     | TEMP [8]           | Under request| Reports back the temperature close to the input filter.  |case #1 수행|
 | 69h      | Sensor generic        | ALL except DSP | R     | SENSOR_ID [4], DATA [12] | Under request| Each module shall specify in its amp manual what is reported back on this register. |case #1 수행|
-| 69h      | Sensor generic        | DSP         | S / R | SENSOR_ID [4], DATA [12] | Under request| Each module shall specify in its amp manual what is reported back on this register. |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
+| 69h      | Sensor generic        | DSP         | S / R | SENSOR_ID [4], DATA [12] | Under request| Each module shall specify in its amp manual what is reported back on this register. |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행 |
 | 6Ah-6Fh  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
 
 ## Module Configuration CIDs
 | CID       | Command Name               | Device Type       | Sender / Receiver | Layout         | Update Rate | Comments | Example |
 |-----------|----------------------------|-------------------|-------------------|----------------|--------------|----------|---------|
-| 70h      | Module enable         | ALL except DSP / HU | R     | ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |case #1수행<br><br>|
-| 70h      | Module enable         | DSP / HU         | S / R |   ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
+| 70h      | Module enable         | ALL except DSP / HU | R     | ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |case #1수행|
+| 70h      | Module enable         | DSP / HU         | S / R |   ENABLE [2]         | Under request| Communication with module shall be allowed before this command is issued.<br>Values:<br>00 = Standby<br>01 = Enable<br>11 = Error<br>This command enables most of the module functionality and brings it into idle state from sleep mode.<br>Power supplies and peripherals are enabled.<br>After Zone is muted, send to Standby muted devices. |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
 | 77h-7Fh  | Reserved              | N/A         | N/A   | N/A                | N/A          | Reserved by Harman for future protocols support.          |
 
 ## Protection and Diagnostics CIDs
 | CID       | Command Name               | Device Type       | Sender / Receiver | Layout         | Update Rate | Comments | Example |
 |-----------|----------------------------|-------------------|-------------------|----------------|--------------|----------|---------|
-| 80h    | Module status          | ALL | S / R | ENABLE [1], VOLTAGE_LEVEL [5], OVP [1], UVP [1], OCP [1], TEMPERATURE [8], THERMAL_FB [1], THERMAL_SD [1] | On flag event (OVP, UVP, OCP, TFB, TSD) | - **ENABLE device:** <br> 0 = No/Off/Disabled/Reset/"0"<br> 1 = Yes/On/Enable/Set/"1" <br><br> - **VOLTAGE_LEVEL:** Range 6.0 – 21.0 V (step 0.5) <br> 00h = 6V, 1Eh = 21V, 1Fh = 21V+ <br><br> - **Over-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Under-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Over-Current Protection flag:** 0 = No, 1 = Yes <br><br> - **TEMPERATURE:** Range -127°C to 127°C <br><br> - **Thermal Foldback flag:** 0 = No, 1 = Yes <br> - **Thermal Shutdown flag:** 0 = No, 1 = Yes |'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
+| 80h    | Module status          | ALL (not HU, not DSP)  | S / R | ENABLE [1], VOLTAGE_LEVEL [5], OVP [1], UVP [1], OCP [1], TEMPERATURE [8], THERMAL_FB [1], THERMAL_SD [1] | On flag event (OVP, UVP, OCP, TFB, TSD) | - **ENABLE device:** <br> 0 = No/Off/Disabled/Reset/"0"<br> 1 = Yes/On/Enable/Set/"1" <br><br> - **VOLTAGE_LEVEL:** Range 6.0 – 21.0 V (step 0.5) <br> 00h = 6V, 1Eh = 21V, 1Fh = 21V+ <br><br> - **Over-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Under-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Over-Current Protection flag:** 0 = No, 1 = Yes <br><br> - **TEMPERATURE:** Range -127°C to 127°C <br><br> - **Thermal Foldback flag:** 0 = No, 1 = Yes <br> - **Thermal Shutdown flag:** 0 = No, 1 = Yes |'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
 | 80h    | Module status          | DSP / HU    | R | ENABLE [1], VOLTAGE_LEVEL [5], OVP [1], UVP [1], OCP [1], TEMPERATURE [8], THERMAL_FB [1], THERMAL_SD [1] | On flag event (OVP, UVP, OCP, TFB, TSD) | - **ENABLE device:** <br> 0 = No/Off/Disabled/Reset/"0"<br> 1 = Yes/On/Enable/Set/"1" <br><br> - **VOLTAGE_LEVEL:** Range 6.0 – 21.0 V (step 0.5) <br> 00h = 6V, 1Eh = 21V, 1Fh = 21V+ <br><br> - **Over-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Under-Voltage Protection flag:** 0 = No, 1 = Yes <br> - **Over-Current Protection flag:** 0 = No, 1 = Yes <br><br> - **TEMPERATURE:** Range -127°C to 127°C <br><br> - **Thermal Foldback flag:** 0 = No, 1 = Yes <br> - **Thermal Shutdown flag:** 0 = No, 1 = Yes |case #1 수행 <br><br>|
-| 81h    | Channel clip detection | AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16|'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| 82h    | Channel short detection| AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16|'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| 83h    | Channel open detection | AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16|'R' 선택시 : case #1 수행 <br>
-'S' 선택시 : case #2 수행 <br><br>|
-| 84h    | SHARC status           | DSP  / HU      | R     | Status_OK [1]                | Periodic 5s           | OR condition of all HW diagnostics from SHARC chipset<br>- PLL_LOCK [1]<br>- Core_Status_Register [1]<br>0 = Not OK<br>1 = OK |
+| 81h    | Channel clip detection | AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16|'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
+| 82h    | Channel short detection| AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16|'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
+| 83h    | Channel open detection | AMP         | S / R | CHANNEL [16]                 | Value change          | Each bit corresponds to a channel and shows logic high for a mute channel<br>XXXXXXXXXXXXXXX1 = CH1<br>XXXXXXXXXXXXXX1X = CH2<br>XXXXXXXXXXXXX1XX = CH3<br>XXXXXXXXXXXX1XXX = CH4<br>...<br>1XXXXXXXXXXXXXXX = CH16|'R' 선택시 : case #1 수행 <br> 'S' 선택시 : case #2 수행|
+| 84h    | SHARC status           | DSP  / HU      | R     | Status_OK [1]                | Periodic 5s           | OR condition of all HW diagnostics from SHARC chipset<br>- PLL_LOCK [1]<br>- Core_Status_Register [1]<br>0 = Not OK<br>1 = OK | case #1 수행|
 | 85h-8Fh| Reserved               | N/A         | N/A   | N/A                         | N/A                   | Reserved for future protocols support |
 
 # 9 UART Protocol between microcontrollers
